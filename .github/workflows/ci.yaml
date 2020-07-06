@@ -1,0 +1,37 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    name: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+      - name: Setup env
+        run: |
+          echo "::set-env name=GOPATH::$(go env GOPATH)"
+          echo "::add-path::$(go env GOPATH)/bin"
+      - name: Setup golint
+        run: GO111MODULE=off go get -u golang.org/x/lint/golint
+      - name: Go build
+        run: |
+          while read mod
+          do
+            pkgdir=$(dirname ${mod})
+            echo "Building ${pkgdir}"
+            cd ${pkgdir}
+            go build ./...
+          done
+      - name: Go lint
+        run: golint ./...
