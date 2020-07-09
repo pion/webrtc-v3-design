@@ -26,9 +26,9 @@ type RemoteTrack interface {
 //
 // ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSendParameters
 type RTPParameters struct {
-	SSRC        uint32
-	PayloadType uint16
-	Encodings   []*webrtc.RTPCodec
+	SSRC          uint32
+	SelectedCodec *webrtc.RTPCodec
+	Codecs        []*webrtc.RTPCodec
 }
 
 // RTPSender represents RTCRtpSender.
