@@ -55,7 +55,10 @@ type RTPReceiver interface {
 }
 
 // RTPTransceiver represents RTCRtpTransceiver.
+// It represents a combination of an RTCRtpSender and an RTCRtpReceiver that share a common mid.
+//
+// ref: https://www.w3.org/TR/webrtc/#rtcrtptransceiver-interface
 type RTPTransceiver interface {
-	RTPSender
-	RTPReceiver
+	RTPSender() RTPSender
+	RTPReceiver() RTPReceiver
 }
