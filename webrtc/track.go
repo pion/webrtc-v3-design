@@ -1,24 +1,28 @@
 package webrtc
 
 import (
-	"github.com/pion/rtp"
+	"github.com/pion/webrtc/v2"
 )
 
-// Track represents MediaStreamTrack.
-type Track interface {
+// TrackBase represents common MediaStreamTrack functionality of LocalTrack and RemoteTrack.
+type TrackBase interface {
 	ID() string
 }
 
 // LocalTrack represents MediaStreamTrack which is fed by the local stream source.
 type LocalTrack interface {
-	Track
-	WriteRTP(*rtp.Packet) error
+	TrackBase
 }
 
 // RemoteTrack represents MediaStreamTrack which is fed by the remote peer.
 type RemoteTrack interface {
-	Track
-	ReadRTP() (*rtp.Packet, error)
+	TrackBase
+}
+
+// Track represents bi-directional MediaStreamTrack.
+type Track interface {
+	RemoteTrack
+	LocalTrack
 }
 
 // RTPParameters represents RTCRtpParameters which contains information about
@@ -33,6 +37,7 @@ type RTPParameters struct {
 
 // RTPSender represents RTCRtpSender.
 type RTPSender interface {
+	// ReplaceLocalTrack registers given LocalTrack as a source of RTP packets.
 	ReplaceTrack(LocalTrack) error
 
 	// Parameters returns information about how the data is to be encoded.
