@@ -6,12 +6,12 @@ import (
 
 // PeerConnection represents RTCPeerConnection.
 type PeerConnection interface {
-	// AddTransceiverFromTrack creates a new RTPTransceiver from Track
+	// AddTransceiverFromTrack creates a new RTPTransceiver from LocalTrack
 	// and register it to the PeerConnection.
 	// RTPTransceiver represents a bidirectional stream.
 	//
 	// ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addTransceiver
-	AddTransceiverFromTrack(Track, ...RTPTransceiverInit) (RTPTransceiver, error)
+	AddTransceiverFromTrack(LocalTrack, ...RTPTransceiverInit) (RTPTransceiver, error)
 	// AddTransceiverFromTrack creates a new RTPTransceiver from RTPCodecType
 	// and register it to the PeerConnection.
 	// RTPTransceiver represents a bidirectional stream.
