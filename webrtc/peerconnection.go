@@ -6,10 +6,6 @@ import (
 
 // PeerConnection represents RTCPeerConnection.
 type PeerConnection interface {
-	// AddTrack adds a new LocalTrack which will transmit media to the other peer.
-	//
-	// ref: ttps://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addTrack
-	AddTrack(LocalTrack) (RTPSender, error)
 	// AddTransceiverFromTrack creates a new RTPTransceiver from Track
 	// and register it to the PeerConnection.
 	// RTPTransceiver represents a bidirectional stream.
