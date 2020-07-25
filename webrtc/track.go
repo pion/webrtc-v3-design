@@ -39,6 +39,8 @@ type RTPParameters struct {
 type RTPSender interface {
 	// ReplaceLocalTrack registers given LocalTrack as a source of RTP packets.
 	ReplaceTrack(LocalTrack) error
+	// Track returns currently registered LocalTrack.
+	Track() LocalTrack
 
 	// Parameters returns information about how the data is to be encoded.
 	Parameters() RTPParameters
@@ -50,6 +52,9 @@ type RTPSender interface {
 
 // RTPReceiver represents RTCRtpReceiver.
 type RTPReceiver interface {
+	// Track returns associated RemoteTrack.
+	Track() RemoteTrack
+
 	// Parameters returns information about how the data is to be decoded.
 	Parameters() RTPParameters
 }
