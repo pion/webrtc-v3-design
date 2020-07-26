@@ -1,6 +1,7 @@
 package webrtc
 
 import (
+	"github.com/pion/webrtc-v3-design/rtpengine"
 	"github.com/pion/webrtc/v2"
 )
 
@@ -48,6 +49,11 @@ type RTPSender interface {
 	// This will be called by PeerConnection according to the result of
 	// SDP based negotiation.
 	SetParameters(RTPParameters) error
+
+	// SetRTPInterceptor inserts given rtpengine.Interceptor to the sending RTP stream.
+	// This is pion extension of WebRTC to customize packet processing algorithms like
+	// packet retransmission and congestion control.
+	SetRTPInterceptor(rtpengine.WriteInterceptor)
 }
 
 // RTPReceiver represents RTCRtpReceiver.
@@ -57,6 +63,11 @@ type RTPReceiver interface {
 
 	// Parameters returns information about how the data is to be decoded.
 	Parameters() RTPParameters
+
+	// SetRTPInterceptor inserts given rtpengine.Interceptor to the received RTP stream.
+	// This is pion extension of WebRTC to customize packet processing algorithms like
+	// jitter buffer and congestion control.
+	SetRTPInterceptor(rtpengine.ReadInterceptor)
 }
 
 // RTPTransceiver represents RTCRtpTransceiver.
