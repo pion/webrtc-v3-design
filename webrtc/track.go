@@ -10,20 +10,42 @@ type TrackBase interface {
 	ID() string
 }
 
-// LocalTrack represents MediaStreamTrack which is fed by the local stream source.
-type LocalTrack interface {
+// LocalRTPTrack represents MediaStreamTrack which is fed by the local stream source.
+// Unlike WebAPI's MediaStreamTrack, the track directly provides RTP stream.
+type LocalRTPTrack interface {
 	TrackBase
+	rtpengine.Reader
+
+	// SetParameters sets information about how the data is to be encoded.
+	// This will be called by PeerConnection according to the result of
+	// SDP based negotiation.
+	// It will be called via RTPSender.Parameters() by PeerConnection to
+	// tell the negotiated media codec information.
+	//
+	// This is pion's extension to process data without having encoder/decoder
+	// in webrtc package.
+	SetParameters(RTPParameters) error
 }
 
-// RemoteTrack represents MediaStreamTrack which is fed by the remote peer.
-type RemoteTrack interface {
+// RemoteRTPTrack represents MediaStreamTrack which is fed by the remote peer.
+// Unlike WebAPI's MediaStreamTrack, the track directly consumes RTP stream.
+type RemoteRTPTrack interface {
 	TrackBase
+	rtpengine.Writer
+
+	// Parameters returns information about how the data is to be encoded.
+	// Call of this function will be redirected to associated RTPReceiver
+	// to get the negotiated media codec information.
+	//
+	// This is pion's extension to process data without having encoder/decoder
+	// in webrtc package.
+	Parameters() RTPParameters
 }
 
-// Track represents bi-directional MediaStreamTrack.
-type Track interface {
-	RemoteTrack
-	LocalTrack
+// RTPTrack represents bi-directional MediaStreamTrack.
+type RTPTrack interface {
+	RemoteRTPTrack
+	LocalRTPTrack
 }
 
 // RTPParameters represents RTCRtpParameters which contains information about
@@ -39,9 +61,9 @@ type RTPParameters struct {
 // RTPSender represents RTCRtpSender.
 type RTPSender interface {
 	// ReplaceLocalTrack registers given LocalTrack as a source of RTP packets.
-	ReplaceTrack(LocalTrack) error
+	ReplaceTrack(LocalRTPTrack) error
 	// Track returns currently registered LocalTrack.
-	Track() LocalTrack
+	Track() LocalRTPTrack
 
 	// Parameters returns information about how the data is to be encoded.
 	Parameters() RTPParameters
@@ -59,7 +81,7 @@ type RTPSender interface {
 // RTPReceiver represents RTCRtpReceiver.
 type RTPReceiver interface {
 	// Track returns associated RemoteTrack.
-	Track() RemoteTrack
+	Track() RemoteRTPTrack
 
 	// Parameters returns information about how the data is to be decoded.
 	Parameters() RTPParameters
