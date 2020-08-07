@@ -22,7 +22,7 @@ type PeerConnection interface {
 	AddTransceiverFromKind(webrtc.RTPCodecType, *RTPTransceiverInit) (RTPTransceiver, error)
 }
 
-// RTPTransceiverInitDict represents RTCRtpTransceiverInit dictionary.
+// RTPTransceiverInit represents RTCRtpTransceiverInit dictionary.
 type RTPTransceiverInit struct {
 	Direction     webrtc.RTPTransceiverDirection
 	SendEncodings []RTPParameters
