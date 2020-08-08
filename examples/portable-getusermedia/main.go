@@ -5,6 +5,7 @@ import (
 	"github.com/pion/mediadevices/pkg/codec/openh264"
 	"github.com/pion/mediadevices/pkg/codec/x264"
 	"github.com/pion/mediadevices/pkg/prop"
+	"github.com/pion/webrtc-v3-design/webrtc"
 
 	// Note: If you don't have a camera or microphone or your adapters are not supported,
 	//       you can always swap your adapters with our dummy adapters below.
@@ -20,12 +21,8 @@ func main() {
 	rtpTracker, _ := mediadevices.NewRTPTracker(x264Params, openh264Params)
 	rtpTracker.PopulateSetting(&setting)
 
-	// User can still modify setting to their needs here
-
-	api := webrtc.NewAPI(webrtc.WithSettingEngine(&setting))
-
 	// Assume that we have configured the api and have proper config
-	pc, _ := api.NewPeerConnection(peerConnectionConfig)
+	pc, _ := setting.NewPeerConnection(webrtc.Configuration{})
 
 	mediaStream, _ := mediadevices.GetUserMedia(mediadevices.MediaStreamConstraints{
 		Video: func(constraint *mediadevices.MediaTrackConstraints) {
