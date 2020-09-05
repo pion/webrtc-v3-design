@@ -2,7 +2,6 @@ package webrtc
 
 import (
 	"github.com/pion/webrtc-v3-design/rtpengine"
-	"github.com/pion/webrtc/v2"
 )
 
 // TrackBase represents common MediaStreamTrack functionality of LocalTrack and RemoteTrack.
@@ -42,20 +41,14 @@ type RemoteRTPTrack interface {
 	Parameters() RTPParameters
 }
 
-// RTPTrack represents bi-directional MediaStreamTrack.
-type RTPTrack interface {
-	RemoteRTPTrack
-	LocalRTPTrack
-}
-
 // RTPParameters represents RTCRtpParameters which contains information about
 // how the RTC data is to be encoded/decoded.
 //
 // ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSendParameters
 type RTPParameters struct {
 	SSRC          uint32
-	SelectedCodec *webrtc.RTPCodec
-	Codecs        []*webrtc.RTPCodec
+	SelectedCodec *RTPCodecCapability
+	Codecs        []*RTPCodecCapability
 }
 
 // RTPSender represents RTCRtpSender.
@@ -67,6 +60,7 @@ type RTPSender interface {
 
 	// Parameters returns information about how the data is to be encoded.
 	Parameters() RTPParameters
+
 	// SetParameters sets information about how the data is to be encoded.
 	// This will be called by PeerConnection according to the result of
 	// SDP based negotiation.
