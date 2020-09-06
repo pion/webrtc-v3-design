@@ -7,6 +7,7 @@ import (
 // TrackBase represents common MediaStreamTrack functionality of LocalTrack and RemoteTrack.
 type TrackBase interface {
 	ID() string
+	Stop() error
 }
 
 // LocalRTPTrack represents MediaStreamTrack which is fed by the local stream source.
