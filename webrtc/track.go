@@ -14,7 +14,7 @@ type TrackBase interface {
 // Unlike WebAPI's MediaStreamTrack, the track directly provides RTP stream.
 type LocalRTPTrack interface {
 	TrackBase
-	rtpengine.Reader
+	rtpengine.Writer
 
 	// SetParameters sets information about how the data is to be encoded.
 	// This will be called by PeerConnection according to the result of
@@ -31,7 +31,7 @@ type LocalRTPTrack interface {
 // Unlike WebAPI's MediaStreamTrack, the track directly consumes RTP stream.
 type RemoteRTPTrack interface {
 	TrackBase
-	rtpengine.Writer
+	rtpengine.Reader
 
 	// Parameters returns information about how the data is to be encoded.
 	// Call of this function will be redirected to associated RTPReceiver
@@ -49,7 +49,7 @@ type RemoteRTPTrack interface {
 type RTPParameters struct {
 	SSRC          uint32
 	SelectedCodec *RTPCodecCapability
-	Codecs        []*RTPCodecCapability
+	Codecs        []RTPCodecCapability
 }
 
 // RTPSender represents RTCRtpSender.

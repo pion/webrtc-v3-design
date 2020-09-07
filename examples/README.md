@@ -1,8 +1,15 @@
 #### [Play Files from Disk](examples/play-from-disk)
 Example of playing file from disk.
 
-* User declares codecs they are reading from disk
+* User declares codec they are reading from disk
 * On each negotiated PeerConnection they are notified if the receiver can accept what they are offering
+* Read packets from disk and send until completed
+
+#### [Play Files from Disk Dynamic](examples/play-from-disk-dynamic)
+Example of playing a file from a disk and condtionally selecting codec.
+
+* User declares codecs that are available
+* On each negotiated PeerConnection a callback is fired with the codecs that are supported
 * Read packets from disk and send until completed
 
 #### [Save files to Disk](examples/save-to-disk)
