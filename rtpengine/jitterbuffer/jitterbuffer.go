@@ -1,6 +1,8 @@
 package jitterbuffer
 
 import (
+	"context"
+
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc-v3-design/rtpengine"
@@ -12,7 +14,7 @@ type JitterBuffer struct {
 }
 
 // Intercept implements ReadInterceptor.
-func (j *JitterBuffer) Intercept(r rtpengine.Reader) rtpengine.Reader {
+func (j *JitterBuffer) Intercept(ctx context.Context, r rtpengine.Reader) rtpengine.Reader {
 	return &jitterBufferReader{r}
 }
 
@@ -20,13 +22,13 @@ type jitterBufferReader struct {
 	in rtpengine.Reader
 }
 
-func (j *jitterBufferReader) WriteRTCP(p rtcp.Packet) error {
+func (j *jitterBufferReader) WriteRTCP(ctx context.Context, p rtcp.Packet) error {
 	// This interceptor doesn't use RTCP packet.
-	return j.in.WriteRTCP(p)
+	return j.in.WriteRTCP(ctx, p)
 }
 
-func (j *jitterBufferReader) ReadRTP() (*rtp.Packet, error) {
-	p, err := j.in.ReadRTP()
+func (j *jitterBufferReader) ReadRTP(ctx context.Context) (*rtp.Packet, error) {
+	p, err := j.in.ReadRTP(ctx)
 	if err != nil {
 		return nil, err
 	}

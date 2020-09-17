@@ -1,6 +1,8 @@
 package webrtc
 
 import (
+	"context"
+
 	"github.com/pion/webrtc-v3-design/rtpengine"
 )
 
@@ -22,7 +24,7 @@ type LocalTrackAdapter interface {
 	// PeerConnection.AddTransceiverFromTrack().
 	//
 	// For example of LocalRTPTrack and PassthroughRTPSender, it might be like:
-	//   func Bind(track LocalTrack, sender RTPSender) error {
+	//   func Bind(ctx context.Context, track LocalTrack, sender RTPSender) error {
 	//     rtpTrack, ok := track.(LocalRTPTrack)
 	//     if !ok {
 	//       return ErrIncompatible
@@ -33,9 +35,9 @@ type LocalTrackAdapter interface {
 	//     }
 	//     // RTP packets written via LocalRTPTrack.WriteRTP() will be
 	//     // read by LocalRTPTrack.pipeReader.ReadRTP().
-	//     return rtpengine.Copy(ptSender, rtpTrack.pipeReader)
+	//     return rtpengine.Copy(ctx, ptSender, rtpTrack.pipeReader)
 	//   }
-	Bind(LocalTrack, RTPSender) error
+	Bind(context.Context, LocalTrack, RTPSender) error
 }
 
 // LocalRTPTrack represents MediaStreamTrack which is fed by the local stream source.
@@ -66,7 +68,7 @@ type RemoteTrackAdapter interface {
 	// PeerConnection.AddTransceiverFromKind().
 	//
 	// For example of RemoteRTPTrack and PassthroughRTPReceiver, it might be like:
-	//   func Bind(track RemoteTrack, sender RTPReceiver) error {
+	//   func Bind(ctx context.Context, track RemoteTrack, sender RTPReceiver) error {
 	//     rtpTrack, ok := track.(RemoteRTPTrack)
 	//     if !ok {
 	//       return ErrIncompatible
@@ -77,9 +79,9 @@ type RemoteTrackAdapter interface {
 	//     }
 	//     // RTP packets written to RemoteRTPTrack.pipeWriter.WriteRTP() will be read from
 	//     // RemoteRTPTrack.ReadRTP().
-	//     return rtpengine.Copy(rtpTrack.pipeWriter, ptReceiver)
+	//     return rtpengine.Copy(ctx, rtpTrack.pipeWriter, ptReceiver)
 	//   }
-	Bind(RemoteTrack, RTPReceiver) error
+	Bind(context.Context, RemoteTrack, RTPReceiver) error
 }
 
 // RemoteRTPTrack represents MediaStreamTrack which is fed by the remote peer.
