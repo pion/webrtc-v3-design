@@ -1,6 +1,7 @@
 package nackhandler
 
 import (
+	"context"
 	"io"
 
 	"github.com/pion/rtcp"
@@ -13,11 +14,11 @@ type NACKHandler struct {
 }
 
 // Intercept implements ReadInterceptor.
-func (n *NACKHandler) Intercept(w rtpengine.Writer) rtpengine.Writer {
+func (n *NACKHandler) Intercept(ctx context.Context, w rtpengine.Writer) rtpengine.Writer {
 	chRTCP := make(chan rtcp.Packet)
 	go func() {
 		for {
-			p, err := w.ReadRTCP()
+			p, err := w.ReadRTCP(ctx)
 			if err != nil {
 				return
 			}
@@ -39,17 +40,21 @@ type nackHandlerWriter struct {
 	chRTCP chan rtcp.Packet
 }
 
-func (n *nackHandlerWriter) WriteRTP(p *rtp.Packet) error {
+func (n *nackHandlerWriter) WriteRTP(ctx context.Context, p *rtp.Packet) error {
 	// Passthrough the packet and buffer some duration of the packets.
-	return n.out.WriteRTP(p)
+	return n.out.WriteRTP(ctx, p)
 }
 
-func (n *nackHandlerWriter) ReadRTCP() (rtcp.Packet, error) {
-	p, ok := <-n.chRTCP
-	if !ok {
-		return nil, io.EOF
+func (n *nackHandlerWriter) ReadRTCP(ctx context.Context) (rtcp.Packet, error) {
+	select {
+	case p, ok := <-n.chRTCP:
+		if !ok {
+			return nil, io.EOF
+		}
+		return p, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
-	return p, nil
 }
 
 // Assert NACKHandler implements rtpengine.WriteInterceptor.
