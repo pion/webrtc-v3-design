@@ -16,3 +16,8 @@ type Writer interface {
 	WriteRTP(*rtp.Packet) error
 	ReadRTCP() (rtcp.Packet, error)
 }
+
+// Copy rtp.Packet from Reader to Writer and rtcp.Packet from Writer to Reader.
+func Copy(Writer, Reader) error {
+	panic("unimplemented")
+}
