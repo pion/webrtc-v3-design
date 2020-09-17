@@ -8,6 +8,14 @@ type SettingEngine interface {
 	// implements packetization for.
 	SetEncodings([]*RTPCodecCapability) error
 
+	// SetLocalTrackAdapters registers LocalTrackAdapters.
+	// LocalRTPTrack-PassthroughRTPSender is registered by default.
+	SetLocalTrackAdapters([]LocalTrackAdapter) error
+
+	// SetRemoteTrackAdapters registers RemoteTrackAdapters.
+	// RemoteRTPTrack-PassthroughRTPReceiver is registered by default.
+	SetRemoteTrackAdapters([]RemoteTrackAdapter) error
+
 	// NewPeerConnection creates a NewPeerConnection
 	NewPeerConnection(Configuration) (PeerConnection, error)
 }
