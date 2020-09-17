@@ -20,7 +20,7 @@ type PeerConnection interface {
 	// Returned RTPTransceiver will be a bidirectional stream by default.
 	//
 	// ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addTransceiver
-	AddTransceiverFromTrack(LocalRTPTrack, *RTPTransceiverInit) (RTPTransceiver, error)
+	AddTransceiverFromTrack(LocalTrack, *RTPTransceiverInit) (RTPTransceiver, error)
 
 	// AddTransceiverFromKind creates a new RTPTransceiver from RTPCodecType
 	// and register it to the PeerConnection.
@@ -33,7 +33,7 @@ type PeerConnection interface {
 	// OnTrack handles an incoming media feed.
 	//
 	// ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/ontrack
-	OnTrack(func(RemoteRTPTrack, RTPReceiver))
+	OnTrack(func(RemoteTrack, RTPReceiver))
 }
 
 // RTPTransceiverInit represents RTCRtpTransceiverInit dictionary.

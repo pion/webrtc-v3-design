@@ -10,10 +10,38 @@ type TrackBase interface {
 	Stop() error
 }
 
+// LocalTrack is an abstract interface of LocalTrack implementations.
+type LocalTrack interface {
+	TrackBase
+}
+
+// LocalTrackAdapter provides a method to connect specific pair of LocalTrack and RTPSender.
+type LocalTrackAdapter interface {
+	// Bind should implement the way how the media data flows from LocalTrack to RTPSender.
+	// This will be called internally by RTPSender.ReplaceTrack() and
+	// PeerConnection.AddTransceiverFromTrack().
+	//
+	// For example of LocalRTPTrack and PassthroughRTPSender, it might be like:
+	//   func Bind(track LocalTrack, sender RTPSender) error {
+	//     rtpTrack, ok := track.(LocalRTPTrack)
+	//     if !ok {
+	//       return ErrIncompatible
+	//     }
+	//     ptSender, ok := sender.(PassthroughRTPSender)
+	//     if !ok {
+	//       return ErrIncompatible
+	//     }
+	//     // RTP packets written via LocalRTPTrack.WriteRTP() will be
+	//     // read by LocalRTPTrack.pipeReader.ReadRTP().
+	//     return rtpengine.Copy(ptSender, rtpTrack.pipeReader)
+	//   }
+	Bind(LocalTrack, RTPSender) error
+}
+
 // LocalRTPTrack represents MediaStreamTrack which is fed by the local stream source.
 // Unlike WebAPI's MediaStreamTrack, the track directly provides RTP stream.
 type LocalRTPTrack interface {
-	TrackBase
+	LocalTrack
 	rtpengine.Writer
 
 	// SetParameters sets information about how the data is to be encoded.
@@ -27,10 +55,37 @@ type LocalRTPTrack interface {
 	SetParameters(RTPParameters) error
 }
 
+// RemoteTrack is an abstract interface of RemoteTrack implementations.
+type RemoteTrack interface {
+	TrackBase
+}
+
+// RemoteTrackAdapter provides a method to connect specific pair of RemoteTrack and RTPReceiver.
+type RemoteTrackAdapter interface {
+	// Bind should implement the way how the media data flows from RTPReceiver to RemoteTrack.
+	// PeerConnection.AddTransceiverFromKind().
+	//
+	// For example of RemoteRTPTrack and PassthroughRTPReceiver, it might be like:
+	//   func Bind(track RemoteTrack, sender RTPReceiver) error {
+	//     rtpTrack, ok := track.(RemoteRTPTrack)
+	//     if !ok {
+	//       return ErrIncompatible
+	//     }
+	//     ptReceiver, ok := sender.(PassthroughRTPReceiver)
+	//     if !ok {
+	//       return ErrIncompatible
+	//     }
+	//     // RTP packets written to RemoteRTPTrack.pipeWriter.WriteRTP() will be read from
+	//     // RemoteRTPTrack.ReadRTP().
+	//     return rtpengine.Copy(rtpTrack.pipeWriter, ptReceiver)
+	//   }
+	Bind(RemoteTrack, RTPReceiver) error
+}
+
 // RemoteRTPTrack represents MediaStreamTrack which is fed by the remote peer.
 // Unlike WebAPI's MediaStreamTrack, the track directly consumes RTP stream.
 type RemoteRTPTrack interface {
-	TrackBase
+	RemoteTrack
 	rtpengine.Reader
 
 	// Parameters returns information about how the data is to be encoded.
@@ -55,9 +110,9 @@ type RTPParameters struct {
 // RTPSender represents RTCRtpSender.
 type RTPSender interface {
 	// ReplaceLocalTrack registers given LocalTrack as a source of RTP packets.
-	ReplaceTrack(LocalRTPTrack) error
+	ReplaceTrack(LocalTrack) error
 	// Track returns currently registered LocalTrack.
-	Track() LocalRTPTrack
+	Track() LocalTrack
 
 	// Parameters returns information about how the data is to be encoded.
 	Parameters() RTPParameters
@@ -73,10 +128,18 @@ type RTPSender interface {
 	SetRTPInterceptor(rtpengine.WriteInterceptor)
 }
 
+// PassthroughRTPSender is a RTPSender which can be used with LocalRTPTrack.
+// RTP packets written through rtpengine.Writer interface will be directly
+// passed to LocalRTPTrack.
+type PassthroughRTPSender interface {
+	RTPSender
+	rtpengine.Writer
+}
+
 // RTPReceiver represents RTCRtpReceiver.
 type RTPReceiver interface {
 	// Track returns associated RemoteTrack.
-	Track() RemoteRTPTrack
+	Track() RemoteTrack
 
 	// Parameters returns information about how the data is to be decoded.
 	Parameters() RTPParameters
@@ -85,6 +148,13 @@ type RTPReceiver interface {
 	// This is pion extension of WebRTC to customize packet processing algorithms like
 	// jitter buffer and congestion control.
 	SetRTPInterceptor(rtpengine.ReadInterceptor)
+}
+
+// PassthroughRTPReceiver is a RTPReceiver which can be used with RemoteRTPTrack.
+// Received RTP packets can be directly read through rtpengine.Reader interface.
+type PassthroughRTPReceiver interface {
+	RTPReceiver
+	rtpengine.Reader
 }
 
 // RTPTransceiver represents RTCRtpTransceiver.
