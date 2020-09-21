@@ -8,13 +8,13 @@ type SettingEngine interface {
 	// implements packetization for.
 	SetEncodings([]*RTPCodecCapability) error
 
-	// SetLocalTrackAdapters registers LocalTrackAdapters.
+	// SetTrackLocalAdapters registers TrackLocalAdapters.
 	// LocalRTPTrack-PassthroughRTPSender is registered by default.
-	SetLocalTrackAdapters([]LocalTrackAdapter) error
+	SetTrackLocalAdapters([]TrackLocalAdapter) error
 
-	// SetRemoteTrackAdapters registers RemoteTrackAdapters.
+	// SetTrackRemoteAdapters registers TrackRemoteAdapters.
 	// RemoteRTPTrack-PassthroughRTPReceiver is registered by default.
-	SetRemoteTrackAdapters([]RemoteTrackAdapter) error
+	SetTrackRemoteAdapters([]TrackRemoteAdapter) error
 
 	// NewPeerConnection creates a NewPeerConnection
 	NewPeerConnection(Configuration) (PeerConnection, error)
@@ -22,13 +22,13 @@ type SettingEngine interface {
 
 // PeerConnection represents RTCPeerConnection.
 type PeerConnection interface {
-	// AddTransceiverFromTrack creates a new RTPTransceiver from LocalTrack
+	// AddTransceiverFromTrack creates a new RTPTransceiver from TrackLocal
 	// and register it to the PeerConnection.
 	// Pass nil as a second argument to use default setting.
 	// Returned RTPTransceiver will be a bidirectional stream by default.
 	//
 	// ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addTransceiver
-	AddTransceiverFromTrack(LocalTrack, *RTPTransceiverInit) (RTPTransceiver, error)
+	AddTransceiverFromTrack(TrackLocal, *RTPTransceiverInit) (RTPTransceiver, error)
 
 	// AddTransceiverFromKind creates a new RTPTransceiver from RTPCodecType
 	// and register it to the PeerConnection.
@@ -41,7 +41,7 @@ type PeerConnection interface {
 	// OnTrack handles an incoming media feed.
 	//
 	// ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/ontrack
-	OnTrack(func(RemoteTrack, RTPReceiver))
+	OnTrack(func(TrackRemote, RTPReceiver))
 }
 
 // RTPTransceiverInit represents RTCRtpTransceiverInit dictionary.
