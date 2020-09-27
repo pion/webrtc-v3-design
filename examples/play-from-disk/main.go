@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+
 	"github.com/pion/webrtc-v3-design/webrtc"
 	"github.com/pion/webrtc-v3-design/webrtc/pkg/media"
+	"github.com/pion/webrtc-v3-design/webrtc/pkg/media/encodedframe"
 )
 
 func main() {
@@ -19,15 +22,30 @@ func main() {
 
 	peerConnection, _ := s.NewPeerConnection(webrtc.Configuration{})
 
-	track := media.NewStaticLocalRTPTrack(webrtc.RTPCodecCapability{
+	track := media.NewStaticLocalEncodedFrameTrack(webrtc.RTPCodecCapability{
 		MimeType:  "video/vp8", // Should we make this a enum?
 		ClockRate: 90000,       // Sholud we drop from API and just assume?
 	})
 
 	peerConnection.AddTransceiverFromTrack(track, nil)
 
-	// TODO
-	// Do we expose a packetizer as a public API?
-	// Do we add WriteSample?
-	track.WriteRTP(nil)
+	ctx := context.TODO()
+
+	go func() {
+		fb, _ := track.ReadRTCP()
+		_ = fb // do nothing in this example
+	}()
+
+	r := &encodedFrameReader{}
+	for {
+		frame, _ := r.Read(ctx)
+		_ = track.WriteEncodedFrame(frame)
+	}
+}
+
+type encodedFrameReader struct {
+}
+
+func (*encodedFrameReader) Read(ctx context.Context) (*encodedframe.EncodedFrame, error) {
+	panic("not implemented")
 }
