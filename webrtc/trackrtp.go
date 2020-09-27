@@ -51,6 +51,12 @@ type TrackLocalRTP interface {
 	// in webrtc package.
 	SetParameters(RTPParameters) error
 
+	// Parameters returns information about how the data is to be encoded.
+	//
+	// This is pion's extension to process data without having encoder/decoder
+	// in webrtc package.
+	Parameters() RTPParameters
+
 	// pipeReader returns pipe reader connected to the Writer.
 	// For internal implementation.
 	pipeReader() rtpengine.Reader
