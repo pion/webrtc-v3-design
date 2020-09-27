@@ -1,16 +1,29 @@
 package media
 
 import (
+	"errors"
+
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc-v3-design/webrtc"
 	"github.com/pion/webrtc-v3-design/webrtc/pkg/media/encodedframe"
 )
 
-type staticLocalRTPTrack struct{}
+var (
+	ErrUnsupportedCodec = errors.New("unsupported codec")
+)
+
+type staticLocalRTPTrack struct {
+	ssrc   uint32
+	codecs []webrtc.RTPCodecCapability
+}
 
 // NewStaticLocalTrack returns a TrackLocalRTP with a pre-set codec.
-func NewStaticLocalRTPTrack(webrtc.RTPCodecCapability) *staticLocalRTPTrack { return nil }
+func NewStaticLocalRTPTrack(c webrtc.RTPCodecCapability) *staticLocalRTPTrack {
+	return &staticLocalRTPTrack{
+		codecs: []webrtc.RTPCodecCapability{c},
+	}
+}
 
 func (s *staticLocalRTPTrack) ID() string  { return "" }
 func (s *staticLocalRTPTrack) Stop() error { return nil }
@@ -18,14 +31,41 @@ func (s *staticLocalRTPTrack) Stop() error { return nil }
 func (s *staticLocalRTPTrack) WriteRTP(*rtp.Packet) error     { return nil }
 func (s *staticLocalRTPTrack) ReadRTCP() (rtcp.Packet, error) { return nil, nil }
 
-// SetParameters asserts that requested codec is available from the other side
-func (s *staticLocalRTPTrack) SetParameters(webrtc.RTPParameters) error { return nil }
+// SetParameters proxies RTPSender.SetParameters() called by the PeerConnection.
+// The Track should select matching codec from available codecs.
+func (s *staticLocalRTPTrack) SetParameters(params webrtc.RTPParameters) error {
+	if len(s.codecs) == 0 {
+		return ErrUnsupportedCodec
+	}
+	for _, codec := range params.Codecs {
+		if codec.MimeType == s.codecs[0].MimeType {
+			// Found available codec.
+			s.ssrc = params.SSRC
+			return nil
+		}
+	}
+	return ErrUnsupportedCodec
+}
 
-type staticLocalEncodedFrameTrack struct{}
+// Parameters returns available codecs and selected codec.
+func (s *staticLocalRTPTrack) Parameters() webrtc.RTPParameters {
+	return webrtc.RTPParameters{
+		SSRC:          s.ssrc,
+		SelectedCodec: &s.codecs[0],
+		Codecs:        s.codecs,
+	}
+}
+
+type staticLocalEncodedFrameTrack struct {
+	ssrc   uint32
+	codecs []webrtc.RTPCodecCapability
+}
 
 // NewStaticLocalEncodedFrameTrack returns a LocalEncodedFrameTrack with a pre-set codec.
-func NewStaticLocalEncodedFrameTrack(webrtc.RTPCodecCapability) *staticLocalEncodedFrameTrack {
-	return nil
+func NewStaticLocalEncodedFrameTrack(c webrtc.RTPCodecCapability) *staticLocalEncodedFrameTrack {
+	return &staticLocalEncodedFrameTrack{
+		codecs: []webrtc.RTPCodecCapability{c},
+	}
 }
 
 func (s *staticLocalEncodedFrameTrack) ID() string  { return "" }
@@ -36,5 +76,27 @@ func (s *staticLocalEncodedFrameTrack) WriteEncodedFrame(*encodedframe.EncodedFr
 }
 func (s *staticLocalEncodedFrameTrack) ReadRTCP() (rtcp.Packet, error) { return nil, nil }
 
-// SetParameters asserts that requested codec is available from the other side
-func (s *staticLocalEncodedFrameTrack) SetParameters(webrtc.RTPParameters) error { return nil }
+// SetParameters proxies RTPSender.SetParameters() called by the PeerConnection.
+// The Track should select matching codec from available codecs.
+func (s *staticLocalEncodedFrameTrack) SetParameters(params webrtc.RTPParameters) error {
+	if len(s.codecs) == 0 {
+		return ErrUnsupportedCodec
+	}
+	for _, codec := range params.Codecs {
+		if codec.MimeType == s.codecs[0].MimeType {
+			// Found available codec.
+			s.ssrc = params.SSRC
+			return nil
+		}
+	}
+	return ErrUnsupportedCodec
+}
+
+// Parameters returns available codecs and selected codec.
+func (s *staticLocalEncodedFrameTrack) Parameters() webrtc.RTPParameters {
+	return webrtc.RTPParameters{
+		SSRC:          s.ssrc,
+		SelectedCodec: &s.codecs[0],
+		Codecs:        s.codecs,
+	}
+}
