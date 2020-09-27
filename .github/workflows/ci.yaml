@@ -26,12 +26,18 @@ jobs:
         run: GO111MODULE=off go get -u golang.org/x/lint/golint
       - name: Go build
         run: |
-          while read mod
+          echo \
+              examples \
+              mediadevices \
+              rtpengine \
+              webrtc \
+            | xargs -n1 echo | while read pkgdir
           do
-            pkgdir=$(dirname ${mod})
-            echo "Building ${pkgdir}"
-            cd ${pkgdir}
-            go build ./...
+            (
+              echo "Building ${pkgdir}"
+              cd ${pkgdir}
+              go build ./...
+            )
           done
       - name: Go lint
         run: golint ./...
