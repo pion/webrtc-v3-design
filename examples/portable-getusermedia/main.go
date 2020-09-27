@@ -1,10 +1,12 @@
 package main
 
 import (
-	"github.com/pion/mediadevices"
+	mediadevices2 "github.com/pion/mediadevices"
+	"github.com/pion/mediadevices/pkg/codec"
 	"github.com/pion/mediadevices/pkg/codec/openh264"
-	"github.com/pion/mediadevices/pkg/codec/x264"
+	"github.com/pion/mediadevices/pkg/codec/vpx"
 	"github.com/pion/mediadevices/pkg/prop"
+	"github.com/pion/webrtc-v3-design/mediadevices"
 	"github.com/pion/webrtc-v3-design/webrtc"
 
 	// Note: If you don't have a camera or microphone or your adapters are not supported,
@@ -16,25 +18,25 @@ import (
 func main() {
 	var setting webrtc.SettingEngine
 
-	x264Params, _ := x264.NewParams()
 	openh264Params, _ := openh264.NewParams()
-	rtpTracker, _ := mediadevices.NewRTPTracker(x264Params, openh264Params)
-	rtpTracker.PopulateSetting(&setting)
+	vp8Params, _ := vpx.NewVP8Params()
 
 	// Assume that we have configured the api and have proper config
 	pc, _ := setting.NewPeerConnection(webrtc.Configuration{})
 
-	mediaStream, _ := mediadevices.GetUserMedia(mediadevices.MediaStreamConstraints{
-		Video: func(constraint *mediadevices.MediaTrackConstraints) {
+	md := mediadevices.NewMediaDevices()
+	mediaStream, _ := md.GetUserMedia(mediadevices2.MediaStreamConstraints{
+		Video: func(constraint *mediadevices2.MediaTrackConstraints) {
 			constraint.Width = prop.Int(600)
 			constraint.Height = prop.Int(400)
+			constraint.VideoEncoderBuilders = []codec.VideoEncoderBuilder{&openh264Params, &vp8Params}
 		},
 	})
 
 	for _, mediaTrack := range mediaStream.GetTracks() {
-		// rtpTracker.Track will create LocalRTPTrack, which later can be used for pulling video/audio frames.
-		pc.AddTransceiverFromTrack(rtpTracker.Track(mediaTrack),
-			webrtc.RtpTransceiverInit{
+		// rtpTracker.Track will create TrackLocalRTP, which later can be used for pulling video/audio frames.
+		pc.AddTransceiverFromTrack(mediaTrack,
+			&webrtc.RTPTransceiverInit{
 				Direction: webrtc.RTPTransceiverDirectionSendonly,
 			},
 		)
