@@ -2,6 +2,7 @@ package webrtc
 
 import (
 	"context"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/pion/webrtc-v3-design/rtpengine"
 )
@@ -22,9 +23,16 @@ func (*TrackLocalRTP_RTPSenderPassthrough) Bind(ctx context.Context, track Track
 	if !ok {
 		return ErrIncompatible
 	}
+	eg, ctx2 := errgroup.WithContext(ctx)
 	// RTP packets written via TrackLocalRTP.WriteRTP() will be
 	// read by TrackLocalRTP.pipeReader.ReadRTP().
-	return rtpengine.Copy(ctx, ptSender, rtpTrack.pipeReader())
+	eg.Go(func() error {
+		return rtpengine.Copy(ctx2, ptSender, rtpTrack.pipeReader())
+	})
+	eg.Go(func() error {
+		return rtpengine.CopyFeedback(ctx2, rtpTrack.pipeReader(), ptSender)
+	})
+	return eg.Wait()
 }
 
 // TrackLocalRTP represents MediaStreamTrack which is fed by the local stream source.
@@ -62,9 +70,16 @@ func (*TrackRemoteRTP_RTPReceiverPassthrough) Bind(ctx context.Context, track Tr
 	if !ok {
 		return ErrIncompatible
 	}
+	eg, ctx2 := errgroup.WithContext(ctx)
 	// RTP packets written to TrackRemoteRTP.pipeWriter.WriteRTP() will be read from
 	// TrackRemoteRTP.ReadRTP().
-	return rtpengine.Copy(ctx, rtpTrack.pipeWriter(), ptReceiver)
+	eg.Go(func() error {
+		return rtpengine.Copy(ctx2, rtpTrack.pipeWriter(), ptReceiver)
+	})
+	eg.Go(func() error {
+		return rtpengine.CopyFeedback(ctx2, ptReceiver, rtpTrack.pipeWriter())
+	})
+	return eg.Wait()
 }
 
 // TrackRemoteRTP represents MediaStreamTrack which is fed by the remote peer.
