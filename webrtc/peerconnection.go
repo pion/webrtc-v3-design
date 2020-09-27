@@ -9,11 +9,11 @@ type SettingEngine interface {
 	SetEncodings([]*RTPCodecCapability) error
 
 	// SetTrackLocalAdapters registers TrackLocalAdapters.
-	// LocalRTPTrack-PassthroughRTPSender is registered by default.
+	// TrackLocalRTP-RTPSenderPassthrough is registered by default.
 	SetTrackLocalAdapters([]TrackLocalAdapter) error
 
 	// SetTrackRemoteAdapters registers TrackRemoteAdapters.
-	// RemoteRTPTrack-PassthroughRTPReceiver is registered by default.
+	// TrackRemoteRTP-RTPReceiverPassthrough is registered by default.
 	SetTrackRemoteAdapters([]TrackRemoteAdapter) error
 
 	// NewPeerConnection creates a NewPeerConnection
