@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: 1.14
+      - name: Install deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install libvpx-dev
       - name: Setup env
         run: |
           echo "::set-env name=GOPATH::$(go env GOPATH)"
