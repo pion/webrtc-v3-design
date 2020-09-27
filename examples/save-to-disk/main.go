@@ -18,7 +18,7 @@ func main() {
 
 	peerConnection, _ := s.NewPeerConnection(webrtc.Configuration{})
 
-	peerConnection.OnTrack(func(track webrtc.RemoteRTPTrack, receiver webrtc.RTPReceiver) {
+	peerConnection.OnTrack(func(track webrtc.TrackRemote, receiver webrtc.RTPReceiver) {
 		// Read RTP Packets (Keep the same API as before)
 	})
 
