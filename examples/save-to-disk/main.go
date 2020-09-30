@@ -9,7 +9,7 @@ func main() {
 
 	// During Offer/Answer exchange the only codec we support will be VP8
 	// If the remote doesn't support VP8 signaling will fail
-	s.SetEncodings([]*webrtc.RTPCodecCapability{
+	_ = s.SetEncodings([]*webrtc.RTPCodecCapability{
 		{
 			MimeType:  "video/vp8", // Should we make this a enum?
 			ClockRate: 90000,       // Sholud we drop from API and just assume?

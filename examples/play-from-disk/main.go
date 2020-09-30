@@ -1,11 +1,13 @@
 package main
 
 import (
-	"context"
+	"os"
+	"time"
 
 	"github.com/pion/webrtc-v3-design/webrtc"
 	"github.com/pion/webrtc-v3-design/webrtc/pkg/media"
 	"github.com/pion/webrtc-v3-design/webrtc/pkg/media/encodedframe"
+	"github.com/pion/webrtc-v3-design/webrtc/pkg/media/ivfreader"
 )
 
 func main() {
@@ -13,7 +15,7 @@ func main() {
 
 	// During Offer/Answer exchange the only codec we support will be VP8
 	// If the remote doesn't support VP8 signaling will fail
-	s.SetEncodings([]*webrtc.RTPCodecCapability{
+	_ = s.SetEncodings([]*webrtc.RTPCodecCapability{
 		{
 			MimeType:  "video/vp8", // Should we make this a enum?
 			ClockRate: 90000,       // Sholud we drop from API and just assume?
@@ -27,25 +29,18 @@ func main() {
 		ClockRate: 90000,       // Sholud we drop from API and just assume?
 	})
 
-	peerConnection.AddTransceiverFromTrack(track, nil)
-
-	ctx := context.TODO()
+	_, _ = peerConnection.AddTransceiverFromTrack(track, nil)
 
 	go func() {
 		fb, _ := track.ReadRTCP()
 		_ = fb // do nothing in this example
 	}()
 
-	r := &encodedFrameReader{}
+	file, _ := os.Open("video.ivf")
+
+	ivf, _, _ := ivfreader.NewWith(file)
 	for {
-		frame, _ := r.Read(ctx)
-		_ = track.WriteEncodedFrame(frame)
+		frame, _, _ := ivf.ParseNextFrame()
+		_ = track.WriteEncodedFrame(&encodedframe.EncodedFrame{Data: frame, Duration: time.Second})
 	}
-}
-
-type encodedFrameReader struct {
-}
-
-func (*encodedFrameReader) Read(ctx context.Context) (*encodedframe.EncodedFrame, error) {
-	panic("not implemented")
 }
