@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/pion/webrtc-v3-design/webrtc"
 )
 
@@ -19,6 +21,9 @@ func main() {
 	peerConnection, _ := s.NewPeerConnection(webrtc.Configuration{})
 
 	peerConnection.OnTrack(func(track webrtc.TrackRemote, receiver webrtc.RTPReceiver) {
+		passthrough := webrtc.TrackRemoteRTP_RTPReceiverPassthrough{}
+
+		_ = passthrough.Bind(context.TODO(), track, receiver)
 		// Read RTP Packets (Keep the same API as before)
 	})
 

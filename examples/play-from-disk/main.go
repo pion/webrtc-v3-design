@@ -37,9 +37,9 @@ func main() {
 	}()
 
 	file, _ := os.Open("video.ivf")
-
 	ivf, _, _ := ivfreader.NewWith(file)
-	for {
+
+	for i := 0; i <= 10; i++ {
 		frame, _, _ := ivf.ParseNextFrame()
 		_ = track.WriteEncodedFrame(&encodedframe.EncodedFrame{Data: frame, Duration: time.Second})
 	}

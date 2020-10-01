@@ -2,22 +2,9 @@ package webrtc
 
 type Configuration struct{}
 
-type SettingEngine interface {
-	// SetEncodings configures the codecs the newly created PeerConnection is willing to
-	// send and receive. If nothing is configured it will support everything that Pion WebRTC
-	// implements packetization for.
-	SetEncodings([]*RTPCodecCapability) error
-
-	// SetTrackLocalAdapters registers TrackLocalAdapters.
-	// TrackLocalRTP-RTPSenderPassthrough is registered by default.
-	SetTrackLocalAdapters([]TrackLocalAdapter) error
-
-	// SetTrackRemoteAdapters registers TrackRemoteAdapters.
-	// TrackRemoteRTP-RTPReceiverPassthrough is registered by default.
-	SetTrackRemoteAdapters([]TrackRemoteAdapter) error
-
-	// NewPeerConnection creates a NewPeerConnection
-	NewPeerConnection(Configuration) (PeerConnection, error)
+func NewPeerConnection(c Configuration) (PeerConnection, error) {
+	var s SettingEngine
+	return s.NewPeerConnection(c)
 }
 
 // PeerConnection represents RTCPeerConnection.
@@ -43,6 +30,16 @@ type PeerConnection interface {
 	// ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/ontrack
 	OnTrack(func(TrackRemote, RTPReceiver))
 }
+
+type peerConnection struct{}
+
+func (p *peerConnection) AddTransceiverFromTrack(TrackLocal, *RTPTransceiverInit) (RTPTransceiver, error) {
+	return nil, nil
+}
+func (p *peerConnection) AddTransceiverFromKind(RTPCodecKind, *RTPTransceiverInit) (RTPTransceiver, error) {
+	return nil, nil
+}
+func (p *peerConnection) OnTrack(func(TrackRemote, RTPReceiver)) {}
 
 // RTPTransceiverInit represents RTCRtpTransceiverInit dictionary.
 type RTPTransceiverInit struct {
