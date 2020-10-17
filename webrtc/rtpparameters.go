@@ -5,7 +5,7 @@ package webrtc
 //
 // ref: https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSendParameters
 type RTPParameters struct {
-	SSRC          uint32
+	SSRC          SSRC
 	SelectedCodec *RTPCodecCapability
 	Codecs        []RTPCodecCapability
 }

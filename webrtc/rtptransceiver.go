@@ -1,5 +1,7 @@
 package webrtc
 
+type SSRC uint32
+
 // RTPSender represents RTCRtpSender.
 type RTPSender interface {
 	// ReplaceTrackLocal registers given TrackLocal as a source of RTP packets.
