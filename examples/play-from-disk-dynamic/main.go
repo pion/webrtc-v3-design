@@ -9,8 +9,11 @@ import (
 type dynamicTrackLocal struct {
 }
 
-func (d *dynamicTrackLocal) ID() string  { return "None" }
-func (d *dynamicTrackLocal) Stop() error { return nil }
+// Users can define their own Track types and decide codecs as they wish
+func (d *dynamicTrackLocal) Bind(c webrtc.TrackLocalContext) error   { return nil }
+func (d *dynamicTrackLocal) Unbind(c webrtc.TrackLocalContext) error { return nil }
+func (d *dynamicTrackLocal) ID() string                              { return "video" }
+func (d *dynamicTrackLocal) StreamID() string                        { return "desktop-capture" }
 
 func main() {
 	var s webrtc.SettingEngine
