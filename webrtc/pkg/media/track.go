@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/pion/rtp"
-	"github.com/pion/srtp"
 	"github.com/pion/webrtc-v3-design/webrtc"
 )
 
@@ -19,7 +18,7 @@ var (
 type trackBinding struct {
 	ssrc        webrtc.SSRC
 	payloadType webrtc.PayloadType
-	writeStream *srtp.WriteStreamSRTP
+	writeStream webrtc.TrackLocalWriter
 }
 
 // staticLocalRTPTrack is a track that has a pre-set codec

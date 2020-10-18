@@ -3,7 +3,7 @@ package webrtc
 import (
 	"errors"
 
-	"github.com/pion/srtp"
+	"github.com/pion/rtp"
 )
 
 var (
@@ -20,7 +20,18 @@ func (t *TrackLocalContext) Parameters() RTPParameters {
 	return RTPParameters{}
 }
 
-func (t *TrackLocalContext) WriteStream() *srtp.WriteStreamSRTP {
+// TrackLocalWriter is the Writer for outbound RTP Packets
+type TrackLocalWriter interface {
+	// WriteRTP encrypts a RTP packet and writes to the connection
+	WriteRTP(header *rtp.Header, payload []byte) (int, error)
+
+	// Write encrypts and writes a full RTP packet
+	Write(b []byte) (int, error)
+}
+
+// WriteStream returns the WriteStream for this TrackLocal. The implementer writes the outbound
+// media packets to it
+func (t *TrackLocalContext) WriteStream() TrackLocalWriter {
 	return nil
 }
 
@@ -51,3 +62,6 @@ type TrackRemote struct{}
 
 // Read reads data from the track.
 func (t *TrackRemote) Read(b []byte) (n int, err error) { return }
+
+// ReadRTP is a convenience method that wraps Read and unmarshals for you
+func (t *TrackRemote) ReadRTP() (*rtp.Packet, error) { return nil, nil }

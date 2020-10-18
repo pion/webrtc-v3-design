@@ -1,7 +1,15 @@
 package webrtc
 
+// A Configuration defines how peer-to-peer communication via PeerConnection
+// is established or re-established.
+// Configurations may be set up once and reused across multiple connections.
+// Configurations are treated as readonly. As long as they are unmodified,
+// they are safe for concurrent use.
 type Configuration struct{}
 
+// NewPeerConnection creates a new WebRTC PeerConnection. This uses a uninitialized
+// SettingEngine. If you wish to access any Pion specific behaviors you should create a
+// PeerConnection using `NewPeerConnection` method of the SettingEngine
 func NewPeerConnection(c Configuration) (PeerConnection, error) {
 	var s SettingEngine
 	return s.NewPeerConnection(c)
