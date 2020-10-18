@@ -19,7 +19,7 @@ func main() {
 
 	uploadPeerConnection, _ := s.NewPeerConnection(webrtc.Configuration{})
 
-	outboundTrack, _ := media.NewStaticLocalRTPTrack(webrtc.RTPCodecCapability{
+	outboundTrack, _ := media.NewLocalTrackStaticRTP(webrtc.RTPCodecCapability{
 		MimeType:  "video/vp8", // Should we make this a enum?
 		ClockRate: 90000,       // Sholud we drop from API and just assume?
 	}, "video", "desktop-capture")
