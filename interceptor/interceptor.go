@@ -5,32 +5,33 @@ import (
 
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
-	"github.com/pion/webrtc-v3-design/webrtc"
+	"github.com/pion/webrtc/v3"
 )
 
-type IncomingRTPInterceptorFactory interface {
-	CreateIncomingRTPInterceptor(*webrtc.PeerConnection) IncomingRTPInterceptor
-	DeleteIncomingRTPInterceptor(*webrtc.PeerConnection)
+type Interceptor interface {
+	InterceptWriteRTP(context.Context, *webrtc.PeerConnection, Writer) Writer
+	InterceptReadRTP(context.Context, *webrtc.PeerConnection, Reader) Reader
+	InterceptWriteRTCP(context.Context, *webrtc.PeerConnection, FeedbackWriter) FeedbackWriter
+	InterceptReadRTCP(context.Context, *webrtc.PeerConnection, FeedbackReader) FeedbackReader
+	Delete(context.Context, *webrtc.PeerConnection)
 }
 
-type IncomingRTPInterceptor interface{
-	InterceptIncomingRTP(ctx context.Context, packet *rtp.Packet, next func(*rtp.Packet)) error
+// Reader is an interface to handle incoming RTP stream.
+type Reader interface {
+	ReadRTP(context.Context) (*rtp.Packet, map[interface{}]interface{}, error)
 }
 
-type OutgoingRTPInterceptorFactory interface {
-	CreateOutgoingRTPInterceptor(*webrtc.PeerConnection) OutgoingRTPInterceptor
-	DeleteOutgoingRTPInterceptor(*webrtc.PeerConnection)
+// Writer is an interface to handle outgoing RTP stream.
+type Writer interface {
+	WriteRTP(context.Context, *rtp.Packet, map[interface{}]interface{}) error
 }
 
-type OutgoingRTPInterceptor interface{
-	InterceptOutgoingRTP(ctx context.Context, packet *rtp.Packet, next func(*rtp.Packet)) error
+// FeedbackReader is an interface to read feedback RTCP packets.
+type FeedbackReader interface {
+	ReadRTCP(context.Context) ([]rtcp.Packet, error)
 }
 
-type RTCPInterceptorFactory interface {
-	CreateRTCPInterceptor(*webrtc.PeerConnection) RTCPInterceptor
-	DeleteRTCPInterceptor(*webrtc.PeerConnection)
-}
-
-type RTCPInterceptor interface {
-	InterceptRTCP(ctx context.Context, packets []rtcp.Packet, next func([]rtcp.Packet)) error
+// FeedbackWriter is an interface to write feedback RTCP packets.
+type FeedbackWriter interface {
+	WriteRTCP(context.Context, []rtcp.Packet) error
 }
